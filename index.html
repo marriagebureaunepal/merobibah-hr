@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeroBibah HR System</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --brand: #C1440E;
+    --brand-dark: #A53A0B;
+    --brand-light: #C1440E18;
+    --admin: #534AB7;
+    --surface-0: #f5f5f3;
+    --surface-1: #efefed;
+    --surface-2: #ffffff;
+    --text-primary: #1a1a18;
+    --text-secondary: #555552;
+    --text-muted: #999993;
+    --border: rgba(0,0,0,0.09);
+    --border-strong: rgba(0,0,0,0.18);
+    --radius: 8px;
+    --green: #3B6D11; --green-bg: #EAF3DE; --green-border: #C0DD97;
+    --amber: #854F0B; --amber-bg: #FAEEDA; --amber-border: #FAC775;
+    --red: #A32D2D;   --red-bg: #FCEBEB;   --red-border: #F09595;
+    --blue: #185FA5;  --blue-bg: #E6F1FB;  --blue-border: #B5D4F4;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--surface-0); color: var(--text-primary); min-height: 100vh; font-size: 14px; line-height: 1.5; }
+
+  /* ── Layout ── */
+  .app { display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar { height: 52px; background: var(--surface-2); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; position: sticky; top: 0; z-index: 50; }
+  .topbar-logo { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; }
+  .topbar-logo .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--brand); }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .user-chip { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--brand-light); color: var(--brand); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .avatar.admin { background: #EEEDFE; color: var(--admin); }
+  .body { display: flex; flex: 1; }
+  .sidebar { width: 210px; background: var(--surface-2); border-right: 1px solid var(--border); padding: 12px 0; flex-shrink: 0; position: sticky; top: 52px; height: calc(100vh - 52px); overflow-y: auto; }
+  .nav-section { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text-muted); padding: 14px 16px 5px; }
+  .nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 16px; font-size: 13.5px; cursor: pointer; color: var(--text-secondary); border-left: 3px solid transparent; transition: all .12s; white-space: nowrap; }
+  .nav-item:hover { background: var(--surface-0); color: var(--text-primary); }
+  .nav-item.active { color: var(--brand); background: var(--brand-light); border-left-color: var(--brand); font-weight: 500; }
+  .nav-item i { font-size: 17px; flex-shrink: 0; }
+  .main { flex: 1; padding: 1.5rem; overflow-y: auto; max-width: 1100px; }
+
+  /* ── Components ── */
+  .page-title { font-size: 19px; font-weight: 600; margin-bottom: 1.25rem; }
+  .card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+  .card + .card, .card + .grid, .grid + .card { margin-top: 1rem; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.25rem; }
+  .metric { background: var(--surface-1); border-radius: var(--radius); padding: 1rem; }
+  .metric-label { font-size: 11.5px; color: var(--text-muted); margin-bottom: 5px; }
+  .metric-value { font-size: 26px; font-weight: 600; }
+  .g { color: var(--green); } .a { color: var(--amber); } .r { color: var(--red); } .b { color: var(--blue); }
+
+  /* ── Buttons ── */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--surface-2); color: var(--text-primary); font-size: 13px; cursor: pointer; transition: all .12s; font-family: inherit; white-space: nowrap; }
+  .btn:hover { background: var(--surface-0); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .btn.primary:hover:not(:disabled) { background: var(--brand-dark); }
+  .btn.danger  { background: var(--red-bg); color: var(--red); border-color: var(--red-border); }
+  .btn.success { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+  .btn.sm { padding: 4px 10px; font-size: 12px; }
+  .btn i { font-size: 15px; }
+
+  /* ── Forms ── */
+  .form-row { margin-bottom: .9rem; }
+  .form-label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; font-weight: 500; }
+  .form-input { width: 100%; padding: 8px 10px; border: 1px solid var(--border-strong); border-radius: var(--radius); font-size: 13px; background: var(--surface-2); color: var(--text-primary); font-family: inherit; transition: border-color .12s; }
+  .form-input:focus { outline: none; border-color: var(--brand); }
+  select.form-input { cursor: pointer; }
+  textarea.form-input { resize: vertical; min-height: 80px; }
+
+  /* ── Table ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 10px 12px; border-bottom: 1px solid rgba(0,0,0,.04); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafaf8; }
+
+  /* ── Badges ── */
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .badge.present, .badge.approved, .badge.active { background: var(--green-bg); color: var(--green); }
+  .badge.absent, .badge.rejected, .badge.inactive { background: var(--red-bg); color: var(--red); }
+  .badge.leave, .badge.pending { background: var(--amber-bg); color: var(--amber); }
+  .badge.clocked-in { background: var(--green-bg); color: var(--green); }
+  .badge.blue { background: var(--blue-bg); color: var(--blue); }
+
+  /* ── Clock Widget ── */
+  .clock-widget { text-align: center; padding: 1.75rem 1rem; }
+  .clock-time { font-size: 46px; font-weight: 300; letter-spacing: -2px; font-variant-numeric: tabular-nums; }
+  .clock-date { font-size: 13px; color: var(--text-secondary); margin: 4px 0 1.25rem; }
+  .clock-status { font-size: 13px; color: var(--text-muted); margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .clock-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 #3B6D1160}50%{box-shadow:0 0 0 5px transparent} }
+
+  /* ── Modal ── */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
+  .modal { background: var(--surface-2); border-radius: 14px; padding: 1.5rem; width: 440px; max-width: 100%; max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 1.25rem; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.25rem; }
+
+  /* ── Login ── */
+  .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--surface-0); padding: 1rem; }
+  .login-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 360px; max-width: 100%; }
+  .login-logo { text-align: center; margin-bottom: 1.5rem; }
+  .login-logo-icon { width: 48px; height: 48px; border-radius: 10px; background: var(--brand); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
+  .login-logo-icon i { color: #fff; font-size: 24px; }
+  .login-title { font-size: 20px; font-weight: 600; }
+  .login-sub { font-size: 12.5px; color: var(--text-muted); }
+  .hint-box { background: var(--surface-0); border-radius: var(--radius); padding: 9px 12px; font-size: 11.5px; color: var(--text-muted); margin-top: 1rem; line-height: 1.6; }
+  .err { font-size: 12px; color: var(--red); margin-bottom: .75rem; padding: 7px 10px; background: var(--red-bg); border-radius: var(--radius); }
+
+  /* ── Misc ── */
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+  .empty i { font-size: 30px; margin-bottom: 8px; display: block; }
+  .empty p { font-size: 13px; }
+  .flex-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .divider { height: 1px; background: var(--border); margin: 1rem 0; }
+  .loading { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 13px; padding: .5rem 0; }
+  .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--brand); border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .person-cell { display: flex; align-items: center; gap: 9px; }
+  .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #1c1c1a; color: #fff; padding: 10px 16px; border-radius: 9px; font-size: 13px; z-index: 999; opacity: 0; transform: translateY(6px); transition: all .2s; pointer-events: none; max-width: 300px; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .warning-box { background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: var(--radius); padding: 10px 14px; font-size: 13px; color: var(--amber); margin-bottom: 1.25rem; display: flex; gap: 8px; align-items: flex-start; }
+  .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; }
+  .tab { padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--text-secondary); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all .12s; }
+  .tab.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 500; }
+  @media (max-width: 640px) {
+    .sidebar { display: none; }
+    .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
+    .main { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- IMPORTANT: Replace the value below with your Apps Script Web App URL -->
+<script>
+  var API_URL = 'https://script.google.com/macros/s/AKfycbzdcrFGMTibhPYPjMMTPWxk8WfuWDxzAswDMBuo5o9_C9x-sADkJYct7rwal7XvXxMj/exec';
+</script>
+
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Utilities ──────────────────────────────────────────────────────────────
+var state = {
+  portal: 'login',     // 'login' | 'staff' | 'admin'
+  page:   'dashboard',
+  user:   null,        // logged-in staff object
+  loading: false,
+  data: { staff:[], attendance:[], worklogs:[], leaves:[], dashboard:{} }
+};
+
+function fmt(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleTimeString('en-NP', {hour:'2-digit', minute:'2-digit'});
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-NP', {day:'2-digit', month:'short', year:'numeric'});
+}
+function todayStr() {
+  var now = new Date();
+  return now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+}
+function initials(n) {
+  return (n||'').split(' ').map(function(x){return x[0]||'';}).join('').toUpperCase().slice(0,2);
+}
+function toast(msg, dur) {
+  var el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, dur||2800);
+}
+function h(tag, attrs, children) {
+  var el = document.createElement(tag);
+  if (attrs) Object.keys(attrs).forEach(function(k) {
+    if (k === 'className') el.className = attrs[k];
+    else if (k === 'style' && typeof attrs[k] === 'object') Object.assign(el.style, attrs[k]);
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2).toLowerCase(), attrs[k]);
+    else el.setAttribute(k, attrs[k]);
+  });
+  if (children) [].concat(children).forEach(function(c) {
+    if (c == null) return;
+    el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  });
+  return el;
+}
+function icon(name, extraStyle) {
+  var i = document.createElement('i');
+  i.className = 'ti ti-'+name;
+  if (extraStyle) Object.assign(i.style, extraStyle);
+  return i;
+}
+function badge(text, cls) {
+  return h('span', {className:'badge '+(cls||text.toLowerCase())}, text);
+}
+function avatarEl(name, cls) {
+  return h('div', {className:'avatar '+(cls||'')}, initials(name));
+}
+function personCell(name, sub) {
+  return h('div', {className:'person-cell'}, [
+    avatarEl(name),
+    h('div', {}, [h('div', {style:{fontWeight:500}}, name), sub ? h('div', {style:{fontSize:11,color:'var(--text-muted)'}}, sub) : null])
+  ]);
+}
+
+// ── API ───────────────────────────────────────────────────────────────────
+function api(params, body) {
+  var url = API_URL;
+  if (params) {
+    url += '?' + Object.keys(params).map(function(k){ return k+'='+encodeURIComponent(params[k]); }).join('&');
+  }
+  var opts = { method: body ? 'POST' : 'GET', headers: {'Content-Type':'application/json'} };
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(url, opts)
+    .then(function(r){ return r.json(); })
+    .catch(function(e){ return { success:false, error: e.message }; });
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+function render() {
+  var app = document.getElementById('app');
+  app.innerHTML = '';
+  if (state.portal === 'login') { app.appendChild(renderLogin()); return; }
+  app.appendChild(renderShell());
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────
+function renderLogin() {
+  var mode = 'choice';
+  var errEl = h('div', {className:'err', style:{display:'none'}});
+
+  function setErr(msg) { errEl.textContent = msg; errEl.style.display = msg ? '' : 'none'; }
+
+  function choiceScreen() {
+    card.innerHTML = '';
+    card.appendChild(logoEl());
+    card.appendChild(h('div', {style:{display:'flex',flexDirection:'column',gap:10,marginTop:'1.5rem'}}, [
+      h('button', {className:'btn primary', style:{justifyContent:'center'}, onClick:function(){ mode='staff'; staffScreen(); }}, [icon('user-circle'), ' Staff login']),
+      h('button', {className:'btn', style:{justifyContent:'center'}, onClick:function(){ mode='admin'; adminScreen(); }}, [icon('shield-check'), ' Admin login']),
+    ]));
+    card.appendChild(h('p', {style:{textAlign:'center',fontSize:12,color:'var(--text-muted)',marginTop:'1.25rem'}}, 'Bibaha Bureau Nepal Pvt. Ltd.'));
+  }
+
+  function staffScreen() {
+    setErr('');
+    var emailIn = h('input', {className:'form-input', type:'email', placeholder:'yourname@merobibah.com'});
+    var pinIn   = h('input', {className:'form-input', type:'password', placeholder:'4-digit PIN', maxlength:'4'});
+
+    function doLogin() {
+      setErr('');
+      var btn = card.querySelector('.btn.primary');
+      btn.disabled = true; btn.textContent = 'Signing in…';
+      api(null, {action:'staffLogin', email:emailIn.value, pin:pinIn.value})
+        .then(function(res) {
+          btn.disabled = false; btn.textContent = 'Sign in';
+          if (res.success) {
+            state.user = res.user;
+            state.portal = 'staff';
+            state.page = 'dashboard';
+            loadStaffData().then(render);
+          } else setErr(res.error || 'Login failed');
+        });
+    }
+    pinIn.addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+
+    card.innerHTML = '';
+    card.appendChild(logoEl('Staff login', 'ti-user-circle'));
+    card.appendChild(errEl);
+    card.appendChild(h('div', {style:{marginTop:'1.5rem'}}, [
+      h('div', {className:'form-row'}, [h('label',{className:'form-label'},'Work email'), emailIn]),
+      h('div', {className:'form-row'}, [h('label',{className:'form-label'},'PIN'), pinIn]),
+      h('button', {className:'btn primary', style:{width:'100%',justifyContent:'center'}, onClick:doLogin}, 'Sign in'),
+      h('button', {className:'btn', style:{width:'100%',justifyContent:'center',marginTop:8}, onClick:choiceScreen}, [icon('arrow-left'), ' Back']),
+    ]));
+  }
+
+  function adminScreen() {
+    setErr('');
+    var pwIn = h('input', {className:'form-input', type:'password', placeholder:'Admin password'});
+
+    function doLogin() {
+      setErr('');
+      var btn = card.querySelector('.btn.primary');
+      btn.disabled = true; btn.textContent = 'Signing in…';
+      api(null, {action:'adminLogin', password:pwIn.value})
+        .then(function(res) {
+          btn.disabled = false; btn.textContent = 'Sign in';
+          if (res.success) {
+            state.portal = 'admin';
+            state.page = 'dashboard';
+            loadAdminData().then(render);
+          } else setErr(res.error || 'Wrong password');
+        });
+    }
+    pwIn.addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+
+    card.innerHTML = '';
+    card.appendChild(logoEl('Admin login', 'ti-shield-check', '#534AB7'));
+    card.appendChild(errEl);
+    card.appendChild(h('div', {style:{marginTop:'1.5rem'}}, [
+      h('div', {className:'form-row'}, [h('label',{className:'form-label'},'Password'), pwIn]),
+      h('button', {className:'btn primary', style:{width:'100%',justifyContent:'center'}, onClick:doLogin}, 'Sign in'),
+      h('button', {className:'btn', style:{width:'100%',justifyContent:'center',marginTop:8}, onClick:choiceScreen}, [icon('arrow-left'), ' Back']),
+    ]));
+  }
+
+  function logoEl(title, icn, color) {
+    var iconBox = h('div', {style:{width:48,height:48,borderRadius:10,background:color||'#C1440E',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 10px'}});
+    iconBox.appendChild(icon(icn||'heart', {color:'#fff',fontSize:'24px'}));
+    return h('div', {className:'login-logo'}, [
+      iconBox,
+      h('div', {className:'login-title'}, title||'MeroBibah HR'),
+      h('div', {className:'login-sub'}, title ? '' : 'Staff & Admin Portal')
+    ]);
+  }
+
+  var card = h('div', {className:'login-card'});
+  choiceScreen();
+  return h('div', {className:'login-page'}, card);
+}
+
+// ── SHELL (topbar + sidebar + main) ──────────────────────────────────────
+function renderShell() {
+  var isAdmin = state.portal === 'admin';
+
+  var nav = isAdmin ? [
+    {id:'dashboard', icon:'layout-dashboard', label:'Dashboard'},
+    {id:'attendance', icon:'clock', label:'Attendance'},
+    {id:'worklogs',  icon:'notes',  label:'Work logs'},
+    {id:'leaves',    icon:'calendar-off', label:'Leave requests'},
+    {id:'staff',     icon:'users',  label:'Staff management'},
+  ] : [
+    {id:'dashboard', icon:'layout-dashboard', label:'Dashboard'},
+    {id:'attendance',icon:'clock',  label:'Attendance'},
+    {id:'worklog',   icon:'notes',  label:'Work log'},
+    {id:'leave',     icon:'calendar-off', label:'Leave'},
+    {id:'history',   icon:'history', label:'My history'},
+  ];
+
+  function navItem(n) {
+    var el = h('div', {className:'nav-item'+(state.page===n.id?' active':'')}, [icon(n.icon), ' '+n.label]);
+    el.addEventListener('click', function(){
+      state.page = n.id;
+      var items = document.querySelectorAll('.nav-item');
+      items.forEach(function(i){ i.classList.remove('active'); });
+      el.classList.add('active');
+      renderPage();
+    });
+    return el;
+  }
+
+  var sidebar = h('div', {className:'sidebar'}, [
+    h('div', {className:'nav-section'}, isAdmin ? 'Admin' : 'Staff'),
+    ...nav.map(navItem)
+  ]);
+
+  // topbar
+  var userLabel = isAdmin ? 'Administrator' : (state.user ? state.user.name : '');
+  var topbar = h('div', {className:'topbar'}, [
+    h('div', {className:'topbar-logo'}, [
+      h('div', {className:'dot'}),
+      'MeroBibah HR',
+      isAdmin ? h('span', {style:{fontSize:11,background:'#534AB7',color:'#fff',padding:'2px 9px',borderRadius:20,fontWeight:600,marginLeft:6}}, 'Admin') : null
+    ]),
+    h('div', {className:'topbar-right'}, [
+      h('div', {className:'user-chip'}, [
+        h('div', {className:'avatar'+(isAdmin?' admin':'')}, isAdmin ? 'AD' : initials(userLabel)),
+        h('span', {}, userLabel),
+      ]),
+      h('button', {className:'btn sm', onClick:function(){ state.portal='login'; state.user=null; state.data={staff:[],attendance:[],worklogs:[],leaves:[],dashboard:{}}; render(); }},
+        [icon('logout'), ' Logout'])
+    ])
+  ]);
+
+  var mainEl = h('div', {className:'main', id:'main-content'});
+  renderPageInto(mainEl);
+
+  return h('div', {className:'app'}, [
+    topbar,
+    h('div', {className:'body'}, [sidebar, mainEl])
+  ]);
+}
+
+function renderPage() {
+  var main = document.getElementById('main-content');
+  if (main) renderPageInto(main);
+}
+
+function renderPageInto(el) {
+  el.innerHTML = '';
+  var isAdmin = state.portal === 'admin';
+  var page = state.page;
+
+  // Auto-refresh data on page switch
+  var dataPromise;
+  if (isAdmin) {
+    dataPromise = loadAdminData();
+  } else {
+    dataPromise = loadStaffData();
+  }
+
+  // Show loading placeholder
+  el.appendChild(h('div', {className:'loading'}, [h('div', {className:'spinner'}), 'Loading…']));
+
+  dataPromise.then(function() {
+    el.innerHTML = '';
+    if (isAdmin) {
+      if (page==='dashboard')  el.appendChild(adminDashboard());
+      if (page==='attendance') el.appendChild(adminAttendance());
+      if (page==='worklogs')   el.appendChild(adminWorklogs());
+      if (page==='leaves')     el.appendChild(adminLeaves());
+      if (page==='staff')      el.appendChild(adminStaff());
+    } else {
+      if (page==='dashboard')  el.appendChild(staffDashboard());
+      if (page==='attendance') el.appendChild(staffAttendance());
+      if (page==='worklog')    el.appendChild(staffWorklog());
+      if (page==='leave')      el.appendChild(staffLeave());
+      if (page==='history')    el.appendChild(staffHistory());
+    }
+  });
+}
+
+// ── DATA LOADERS ─────────────────────────────────────────────────────────
+function loadStaffData() {
+  var user = state.user;
+  return Promise.all([
+    api({action:'getAttendance', staffId:user.id}),
+    api({action:'getWorklogs',   staffId:user.id}),
+    api({action:'getLeaves',     staffId:user.id}),
+  ]).then(function(results) {
+    state.data.attendance = results[0].data || [];
+    state.data.worklogs   = results[1].data || [];
+    state.data.leaves     = results[2].data || [];
+  });
+}
+
+function loadAdminData() {
+  return Promise.all([
+    api({action:'getDashboard'}),
+    api({action:'getStaff'}),
+    api({action:'getAttendance'}),
+    api({action:'getWorklogs'}),
+    api({action:'getLeaves'}),
+  ]).then(function(results) {
+    state.data.dashboard  = (results[0].data) || {};
+    state.data.staff      = results[1].data || [];
+    state.data.attendance = results[2].data || [];
+    state.data.worklogs   = results[3].data || [];
+    state.data.leaves     = results[4].data || [];
+  });
+}
+
+// ── STAFF PAGES ───────────────────────────────────────────────────────────
+function clockStatus() {
+  var today = todayStr();
+  var user = state.user;
+  var att = (state.data.attendance||[]).find(function(a){ return String(a.staffId)===String(user.id) && a.date===today; });
+  return { att:att, isClockedIn: att && att.clockIn && !att.clockOut };
+}
+
+function clockWidget() {
+  var cs = clockStatus();
+  var timeEl = h('div', {className:'clock-time'}, '');
+  var dateEl = h('div', {className:'clock-date'}, '');
+  var statusEl = h('div', {className:'clock-status'});
+  var actionsEl = h('div', {className:'clock-actions'});
+
+  function updateClock() {
+    var now = new Date();
+    timeEl.textContent = now.toLocaleTimeString('en-NP',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    dateEl.textContent = now.toLocaleDateString('en-NP',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  }
+  updateClock();
+  var iv = setInterval(updateClock, 1000);
+  timeEl.addEventListener('disconnectedCallback', function(){ clearInterval(iv); });
+
+  function refreshActions() {
+    cs = clockStatus();
+    statusEl.innerHTML = '';
+    actionsEl.innerHTML = '';
+    if (cs.att && cs.att.clockIn) {
+      var pEl = h('div', {className:'pulse'});
+      statusEl.appendChild(pEl);
+      statusEl.appendChild(document.createTextNode(cs.isClockedIn ? 'Clocked in at '+fmt(cs.att.clockIn) : 'Worked '+cs.att.hoursWorked+'h — clocked out at '+fmt(cs.att.clockOut)));
+    }
+    if (!cs.att) {
+      var btn = h('button', {className:'btn primary', onClick:function(){
+        btn.disabled=true; btn.textContent='Clocking in…';
+        api(null,{action:'clockIn',staffId:state.user.id,staffName:state.user.name}).then(function(r){
+          if(r.success){ toast('Clocked in ✓'); loadStaffData().then(refreshActions); }
+          else { toast('Error: '+r.error); btn.disabled=false; btn.textContent='Clock in'; }
+        });
+      }}, [icon('login'), ' Clock in']);
+      actionsEl.appendChild(btn);
+    } else if (cs.isClockedIn) {
+      var btn2 = h('button', {className:'btn danger', onClick:function(){
+        btn2.disabled=true; btn2.textContent='Clocking out…';
+        api(null,{action:'clockOut',staffId:state.user.id}).then(function(r){
+          if(r.success){ toast('Clocked out ✓ — '+r.hoursWorked+'h worked'); loadStaffData().then(refreshActions); }
+          else { toast('Error: '+r.error); btn2.disabled=false; btn2.textContent='Clock out'; }
+        });
+      }}, [icon('logout'), ' Clock out']);
+      actionsEl.appendChild(btn2);
+    } else {
+      actionsEl.appendChild(h('div', {style:{fontSize:13,color:'var(--text-muted)'}}, 'Attendance recorded for today ✓'));
+    }
+  }
+  refreshActions();
+
+  return h('div', {className:'clock-widget'}, [timeEl, dateEl, statusEl, actionsEl]);
+}
+
+function staffDashboard() {
+  var user = state.user;
+  var att   = state.data.attendance || [];
+  var logs  = state.data.worklogs   || [];
+  var leaves = state.data.leaves    || [];
+  var present = att.filter(function(a){ return a.status==='present'; }).length;
+  var pendingL = leaves.filter(function(l){ return l.status==='pending'; }).length;
+  var totalHrs = logs.reduce(function(s,w){ return s+parseFloat(w.hours||0); },0).toFixed(1);
+
+  var wrap = h('div', {});
+  wrap.appendChild(h('div', {className:'page-title'}, 'Welcome back, '+(user.name.split(' ')[0])));
+  var g = h('div', {className:'grid2'});
+  var cw = h('div', {className:'card'}); cw.appendChild(clockWidget()); g.appendChild(cw);
+  g.appendChild(h('div', {className:'card'}, [
+    h('div', {className:'card-title'}, 'At a glance'),
+    h('div', {style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginTop:8}}, [
+      h('div',{className:'metric'},[h('div',{className:'metric-label'},'Days present'),h('div',{className:'metric-value g'},present)]),
+      h('div',{className:'metric'},[h('div',{className:'metric-label'},'Work logs'),h('div',{className:'metric-value b'},logs.length)]),
+      h('div',{className:'metric'},[h('div',{className:'metric-label'},'Hours logged'),h('div',{className:'metric-value b'},totalHrs+'h')]),
+      h('div',{className:'metric'},[h('div',{className:'metric-label'},'Pending leaves'),h('div',{className:'metric-value a'},pendingL)]),
+    ])
+  ]));
+  wrap.appendChild(g);
+  return wrap;
+}
+
+function staffAttendance() {
+  var att = [...(state.data.attendance||[])].sort(function(a,b){ return b.date.localeCompare(a.date); });
+  var wrap = h('div', {});
+  wrap.appendChild(h('div', {className:'page-title'}, 'Attendance'));
+  var cw = h('div', {className:'card', style:{marginBottom:'1rem'}}); cw.appendChild(clockWidget()); wrap.appendChild(cw);
+  var rows = att.map(function(a) {
+    var hrs = a.clockIn && a.clockOut ? ((new Date(a.clockOut)-new Date(a.clockIn))/3600000).toFixed(1) : '—';
+    return h('tr', {}, [
+      h('td',{},fmtDate(a.date)), h('td',{},fmt(a.clockIn)),
+      h('td',{},a.clockOut ? fmt(a.clockOut) : badge('Active','clocked-in')),
+      h('td',{},hrs!=='—'?hrs+'h':'—'), h('td',{},badge(a.status||'present'))
+    ]);
+  });
+  wrap.appendChild(h('div',{className:'card'},[
+    h('div',{className:'card-title'},'Attendance history'),
+    att.length===0 ? empty('calendar-x','No records yet') :
+    h('div',{className:'table-wrap'},[h('table',{},[
+      h('thead',{},[h('tr',{},[th('Date'),th('Clock in'),th('Clock out'),th('Hours'),th('Status')])]),
+      h('tbody',{},[...rows])
+    ])])
+  ]));
+  return wrap;
+}
+
+function staffWorklog() {
+  var logs = [...(state.data.worklogs||[])].sort(function(a,b){return b.date.localeCompare(a.date);});
+  var wrap = h('div', {});
+  wrap.appendChild(h('div', {className:'page-title'}, 'Work log'));
+
+  var dateIn  = h('input', {className:'form-input', type:'date', value:todayStr()});
+  var hoursIn = h('input', {className:'form-input', type:'number', placeholder:'e.g. 8', min:'0.5', max:'14', step:'0.5'});
+  var tasksIn = h('textarea', {className:'form-input', placeholder:'Describe the tasks you completed today…'});
+  var notesIn = h('input', {className:'form-input', placeholder:'Any blockers, highlights or notes… (optional)'});
+  var errEl   = h('div', {className:'err', style:{display:'none'}});
+
+  function submit() {
+    errEl.style.display='none';
+    if (!tasksIn.value.trim()) { errEl.textContent='Please describe tasks done'; errEl.style.display=''; return; }
+    if (!hoursIn.value||isNaN(hoursIn.value)) { errEl.textContent='Please enter valid hours'; errEl.style.display=''; return; }
+    var btn = wrap.querySelector('.btn.primary');
+    btn.disabled=true; btn.textContent='Submitting…';
+    api(null, {action:'submitWorklog', staffId:state.user.id, staffName:state.user.name,
+               date:dateIn.value, hours:hoursIn.value, tasks:tasksIn.value, notes:notesIn.value})
+      .then(function(r) {
+        btn.disabled=false; btn.textContent='Submit work log';
+        if (r.success) {
+          toast('Work log submitted ✓');
+          tasksIn.value=''; notesIn.value=''; hoursIn.value='';
+          loadStaffData().then(function(){ wrap.replaceWith(staffWorklog()); });
+        } else { errEl.textContent = r.error||'Error'; errEl.style.display=''; }
+      });
+  }
+
+  wrap.appendChild(h('div', {className:'card', style:{marginBottom:'1rem'}}, [
+    h('div',{className:'card-title'},'Submit today\'s work'),
+    h('div',{className:'grid2'},[
+      h('div',{className:'form-row'},[h('label',{className:'form-label'},'Date'), dateIn]),
+      h('div',{className:'form-row'},[h('label',{className:'form-label'},'Hours worked'), hoursIn]),
+    ]),
+    h('div',{className:'form-row'},[h('label',{className:'form-label'},'Tasks completed'), tasksIn]),
+    h('div',{className:'form-row'},[h('label',{className:'form-label'},'Notes'), notesIn]),
+    errEl,
+    h('button',{className:'btn primary',onClick:submit},[icon('send'),' Submit work log'])
+  ]));
+
+  var rows = logs.map(function(w){ return h('tr',{},[h('td',{},fmtDate(w.date)),h('td',{},w.hours+'h'),h('td',{style:{maxWidth:280}},w.tasks),h('td',{style:{color:'var(--text-muted)',maxWidth:180}},w.notes||'—')]); });
+  wrap.appendChild(h('div',{className:'card'},[
+    h('div',{className:'card-title'},'My work logs'),
+    logs.length===0 ? empty('notes','No logs submitted yet') :
+    h('div',{className:'table-wrap'},[h('table',{},[
+      h('thead',{},[h('tr',{},[th('Date'),th('Hours'),th('Tasks'),th('Notes')])]),
+      h('tbody',{},[...rows])
+    ])])
+  ]));
+  return wrap;
+}
+
+function staffLeave() {
+  var leaves = [...(state.data.leaves||[])].sort(function(a,b){return b.appliedAt.localeCompare(a.appliedAt);});
+  var wrap = h('div', {});
+  wrap.appendChild(h('div', {className:'page-title'}, 'Leave application'));
+
+  var typeIn   = h('select', {className:'form-input'});
+  ['Annual Leave','Sick Leave','Personal Leave','Casual Leave','Unpaid Leave'].forEach(function(t){
+    typeIn.appendChild(h('option',{value:t},t));
+  });
+  var fromIn = h('input', {className:'form-input', type:'date', value:todayStr()});
+  var toIn   = h('input', {className:'form-input', type:'date', value:todayStr()});
+  var reasonIn = h('textarea', {className:'form-input', placeholder:'Explain the reason for your leave…'});
+  var errEl  = h('div', {className:'err', style:{display:'none'}});
+
+  function submit() {
+    errEl.style.display='none';
+    if (!reasonIn.value.trim()) { errEl.textContent='Please provide a reason'; errEl.style.display=''; return; }
+    var btn = wrap.querySelector('.btn.primary');
+    btn.disabled=true; btn.textContent='Submitting…';
+    api(null, {action:'applyLeave', staffId:state.user.id, staffName:state.user.name,
+               type:typeIn.value, fromDate:fromIn.value, toDate:toIn.value, reason:reasonIn.value})
+      .then(function(r) {
+        btn.disabled=false; btn.textContent='Submit application';
+        if (r.success) {
+          toast('Leave application submitted ✓');
+          reasonIn.value='';
+          loadStaffData().then(function(){ wrap.replaceWith(staffLeave()); });
+        } else { errEl.textContent=r.error||'Error'; errEl.style.display=''; }
+      });
+  }
+
+  wrap.appendChild(h('div',{className:'card',style:{marginBottom:'1rem'}},[
+    h('div',{className:'card-title'},'Apply for leave'),
+    h('div',{className:'grid2'},[
+      h('div',{className:'form-row'},[h('label',{className:'form-label'},'Leave type'), typeIn]),
+      h('div',{}),
+      h('div',{className:'form-row'},[h('label',{className:'form-label'},'From date'), fromIn]),
+      h('div',{className:'form-row'},[h('label',{className:'form-label'},'To date'), toIn]),
+    ]),
+    h('div',{className:'form-row'},[h('label',{className:'form-label'},'Reason'), reasonIn]),
+    errEl,
+    h('button',{className:'btn primary',onClick:submit},[icon('send'),' Submit application'])
+  ]));
+
+  var rows = leaves.map(function(l){ return h('tr',{},[
+    h('td',{},l.type), h('td',{},fmtDate(l.fromDate)), h('td',{},fmtDate(l.toDate)),
+    h('td',{style:{maxWidth:200}},l.reason), h('td',{},badge(l.status)),
+    h('td',{style:{color:'var(--text-muted)'}},l.adminNote||'—')
+  ]); });
+  wrap.appendChild(h('div',{className:'card'},[
+    h('div',{className:'card-title'},'My leave requests'),
+    leaves.length===0 ? empty('calendar-off','No leave requests yet') :
+    h('div',{className:'table-wrap'},[h('table',{},[
+      h('thead',{},[h('tr',{},[th('Type'),th('From'),th('To'),th('Reason'),th('Status'),th('Admin note')])]),
+      h('tbody',{},[...rows])
+    ])])
+  ]));
+  return wrap;
+}
+
+function staffHistory() {
+  var att   = [...(state.data.attendance||[])].sort(function(a,b){return b.date.localeCompare(a.date);});
+  var logs  = [...(state.data.worklogs||[])].sort(function(a,b){return b.date.localeCompare(a.date);});
+  var leaves= [...(state.data.leaves||[])].sort(function(a,b){return b.appliedAt.localeCompare(a.appliedAt);});
+  var totalHrs = logs.reduce(function(s,w){return s+parseFloat(w.hours||0);},0).toFixed(1);
+
+  var wrap = h('div', {});
+  wrap.appendChild(h('div', {className:'page-title'}, 'My history'));
+  wrap.appendChild(h('div',{className:'grid4',style:{gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))'}}, [
+    h('div',{className:'metric'},[h('div',{className:'metric-label'},'Days present'),h('div',{className:'metric-value g'},att.length)]),
+    h('div',{className:'metric'},[h('div',{className:'metric-label'},'Work logs'),h('div',{className:'metric-value b'},logs.length)]),
+    h('div',{className:'metric'},[h('div',{className:'metric-label'},'Hours logged'),h('div',{className:'metric-value b'},totalHrs+'h')]),
+    h('div',{className:'metric'},[h('div',{className:'metric-label'},'Leave requests'),h('div',{className:'metric-value a'},leaves.length)]),
+  ]));
+
+  var activeTab = 'att';
+  var tabBar = h('div',{className:'tabs'},[
+    makeTab('att','Attendance'), makeTab('logs','Work logs'), makeTab('lvs','Leaves')
+  ]);
+  var tabContent = h('div',{});
+  wrap.appendChild(h('div',{className:'card'},[tabBar,tabContent]));
+
+  function makeTab(id, label) {
+    var el = h('div',{className:'tab'+(id===activeTab?' active':'')},label);
+    el.addEventListener('click', function(){
+      activeTab=id;
+      document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+      el.classList.add('active');
+      renderTabContent();
+    });
+    return el;
+  }
+
+  function renderTabContent() {
+    tabContent.innerHTML='';
+    if (activeTab==='att') {
+      if (!att.length) { tabContent.appendChild(empty('calendar-x','No records')); return; }
+      var rows = att.map(function(a){
+        var hrs=a.clockIn&&a.clockOut?((new Date(a.clockOut)-new Date(a.clockIn))/3600000).toFixed(1):'—';
+        return h('tr',{},[h('td',{},fmtDate(a.date)),h('td',{},fmt(a.clockIn)),h('td',{},a.clockOut?fmt(a.clockOut):'—'),h('td',{},hrs!=='—'?hrs+'h':'—'),h('td',{},badge(a.status||'present'))]);
+      });
+      tabContent.appendChild(h('div',{className:'table-wrap'},[h('table',{},[h('thead',{},[h('tr',{},[th('Date'),th('In'),th('Out'),th('Hours'),th('Status')])]),h('tbody',{},[...rows])])]));
+    }
+    if (activeTab==='logs') {
+      if (!logs.length) { tabContent.appendChild(empty('notes','No logs')); return; }
+      var rows2=logs.map(function(w){return h('tr',{},[h('td',{},fmtDate(w.date)),h('td',{},w.hours+'h'),h('td',{style:{maxWidth:260}},w.tasks),h('td',{style:{color:'var(--text-muted)',maxWidth:160}},w.notes||'—')]);});
+      tabContent.appendChild(h('div',{className:'table-wrap'},[h('table',{},[h('thead',{},[h('tr',{},[th('Date'),th('Hours'),th('Tasks'),th('Notes')])]),h('tbody',{},[...rows2])])]));
+    }
+    if (activeTab==='lvs') {
+      if (!leaves.length) { tabContent.appendChild(empty('calendar-off','No requests')); return; }
+      var rows3=leaves.map(function(l){return h('tr',{},[h('td',{},l.type),h('td',{},fmtDate(l.fromDate)),h('td',{},fmtDate(l.toDate)),h('td',{},badge(l.status)),h('td',{style:{color:'var(--text-muted)'}},l.adminNote||'—')]);});
+      tabContent.appendChild(h('div',{className:'table-wrap'},[h('table',{},[h('thead',{},[h('tr',{},[th('Type'),th('From'),th('To'),th('Status'),th('Note')])]),h('tbody',{},[...rows3])])]));
+    }
+  }
+  renderTabContent();
+  return wrap;
+}
+
+// ── ADMIN PAGES ───────────────────────────────────────────────────────────
+function adminDashboard() {
+  var d = state.data.dashboard || {};
+  var att = state.data.attendance || [];
+  var staff = (state.data.staff||[]).filter(function(s){return String(s.active)==='true';});
+  var todayAtt = att.filter(function(a){return a.date===todayStr();});
+  var pendingLeaves = (state.data.leaves||[]).filter(function(l){return l.status==='pending';});
+
+  var wrap = h('div', {});
+  wrap.appendChild(h('div', {className:'page-title'}, 'Admin dashboard'));
+  wrap.appendChild(h('div',{className:'grid4',style:{marginBottom:'1.25rem',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))'}}, [
+    h('div',{className:'metric'},[h('div',{className:'metric-label'},'Active staff'),h('div',{className:'metric-value b'},staff.length)]),
+    h('div',{className:'metric'},[h('div',{className:'metric-label'},'Present today'),h('div',{className:'metric-value g'},todayAtt.length)]),
+    h('div',{className:'metric'},[h('div',{className:'metric-label'},'Pending leaves'),h('div',{className:'metric-value a'},pendingLeaves.length)]),
+    h('div',{className:'metric'},[h('div',{className:'metric-label'},'Logs today'),h('div',{className:'metric-value'},(state.data.worklogs||[]).filter(function(w){return w.date===todayStr();}).length)]),
+  ]));
+
+  var g = h('div',{className:'grid2'});
+
+  // Today's attendance
+  var attRows = staff.map(function(s){
+    var a = todayAtt.find(function(x){return String(x.staffId)===String(s.id);});
+    return h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'9px 0',borderBottom:'1px solid var(--border)'}},[
+      personCell(s.name, s.designation),
+      a ? badge(fmt(a.clockIn),'present') : badge('Absent','absent')
+    ]);
+  });
+  g.appendChild(h('div',{className:'card'},[
+    h('div',{className:'card-head'},[h('div',{className:'card-title'},"Today's attendance"),
+      h('button',{className:'btn sm',onClick:function(){state.page='attendance';renderPage();}},'View all')]),
+    staff.length===0?empty('clock','No active staff'):h('div',{},[...attRows])
+  ]));
+
+  // Pending leaves
+  var leaveRows = pendingLeaves.slice(0,5).map(function(l){
+    return h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'9px 0',borderBottom:'1px solid var(--border)'}},[
+      h('div',{},[h('div',{style:{fontWeight:500}},l.staffName), h('div',{style:{fontSize:11,color:'var(--text-muted)'}},l.type+' · '+fmtDate(l.fromDate))]),
+      badge('pending')
+    ]);
+  });
+  g.appendChild(h('div',{className:'card'},[
+    h('div',{className:'card-head'},[h('div',{className:'card-title'},'Pending leave requests'),
+      h('button',{className:'btn sm',onClick:function(){state.page='leaves';renderPage();}},'Review')]),
+    pendingLeaves.length===0?empty('circle-check','No pending requests'):h('div',{},[...leaveRows])
+  ]));
+
+  wrap.appendChild(g);
+  return wrap;
+}
+
+function adminAttendance() {
+  var att = [...(state.data.attendance||[])].sort(function(a,b){return b.date.localeCompare(a.date);});
+  var staffMap = {};
+  (state.data.staff||[]).forEach(function(s){staffMap[s.id]=s;});
+
+  var dateIn = h('input',{className:'form-input',type:'date',style:{width:170}});
+  var staffSel = h('select',{className:'form-input',style:{width:200}});
+  staffSel.appendChild(h('option',{value:''},'All staff'));
+  (state.data.staff||[]).filter(function(s){return String(s.active)==='true';}).forEach(function(s){
+    staffSel.appendChild(h('option',{value:s.id},s.name));
+  });
+
+  var tableWrap = h('div',{className:'table-wrap'});
+  function applyFilter() {
+    var filtered = att.filter(function(a){
+      if (dateIn.value && a.date!==dateIn.value) return false;
+      if (staffSel.value && String(a.staffId)!==staffSel.value) return false;
+      return true;
+    });
+    tableWrap.innerHTML='';
+    if (!filtered.length) { tableWrap.appendChild(empty('clock-off','No records found')); return; }
+    var rows=filtered.map(function(a){
+      var hrs=a.clockIn&&a.clockOut?((new Date(a.clockOut)-new Date(a.clockIn))/3600000).toFixed(1):'—';
+      return h('tr',{},[
+        h('td',{},personCell(a.staffName,(staffMap[a.staffId]||{}).designation||a.designation||'')),
+        h('td',{},fmtDate(a.date)),h('td',{},fmt(a.clockIn)),
+        h('td',{},a.clockOut?fmt(a.clockOut):badge('Active','clocked-in')),
+        h('td',{},hrs!=='—'?hrs+'h':'—'),h('td',{},badge(a.status||'present'))
+      ]);
+    });
+    tableWrap.appendChild(h('table',{},[h('thead',{},[h('tr',{},[th('Staff'),th('Date'),th('Clock in'),th('Clock out'),th('Hours'),th('Status')])]),h('tbody',{},[...rows])]));
+  }
+  dateIn.addEventListener('change',applyFilter); staffSel.addEventListener('change',applyFilter);
+
+  var wrap = h('div',{});
+  wrap.appendChild(h('div',{className:'page-title'},'Attendance records'));
+  wrap.appendChild(h('div',{className:'flex-row'},[staffSel,dateIn,h('button',{className:'btn sm',onClick:function(){dateIn.value='';staffSel.value='';applyFilter();}},'Clear filters')]));
+  wrap.appendChild(h('div',{className:'card'},[tableWrap]));
+  applyFilter();
+  return wrap;
+}
+
+function adminWorklogs() {
+  var logs = [...(state.data.worklogs||[])].sort(function(a,b){return b.date.localeCompare(a.date);});
+  var staffSel = h('select',{className:'form-input',style:{width:220}});
+  staffSel.appendChild(h('option',{value:''},'All staff'));
+  (state.data.staff||[]).filter(function(s){return String(s.active)==='true';}).forEach(function(s){
+    staffSel.appendChild(h('option',{value:s.id},s.name));
+  });
+
+  var tableWrap = h('div',{className:'table-wrap'});
+  function applyFilter() {
+    var filtered = logs.filter(function(w){ return !staffSel.value || String(w.staffId)===staffSel.value; });
+    tableWrap.innerHTML='';
+    if (!filtered.length) { tableWrap.appendChild(empty('notes','No work logs found')); return; }
+    var rows=filtered.map(function(w){ return h('tr',{},[
+      h('td',{},personCell(w.staffName,w.designation)),
+      h('td',{},fmtDate(w.date)),h('td',{},w.hours+'h'),
+      h('td',{style:{maxWidth:260}},w.tasks),
+      h('td',{style:{color:'var(--text-muted)',maxWidth:180}},w.notes||'—')
+    ]); });
+    tableWrap.appendChild(h('table',{},[h('thead',{},[h('tr',{},[th('Staff'),th('Date'),th('Hours'),th('Tasks done'),th('Notes')])]),h('tbody',{},[...rows])]));
+  }
+  staffSel.addEventListener('change',applyFilter);
+
+  var wrap = h('div',{});
+  wrap.appendChild(h('div',{className:'page-title'},'Work logs'));
+  wrap.appendChild(h('div',{className:'flex-row'},[staffSel]));
+  wrap.appendChild(h('div',{className:'card'},[tableWrap]));
+  applyFilter();
+  return wrap;
+}
+
+function adminLeaves() {
+  var leaves = [...(state.data.leaves||[])].sort(function(a,b){return b.appliedAt.localeCompare(a.appliedAt);});
+  var wrap = h('div',{});
+  wrap.appendChild(h('div',{className:'page-title'},'Leave requests'));
+
+  function buildTable() {
+    var card = h('div',{className:'card'});
+    if (!leaves.length) { card.appendChild(empty('calendar-off','No leave requests')); return card; }
+    var rows = leaves.map(function(l) {
+      var actionsCell;
+      if (l.status==='pending') {
+        var noteIn = h('input',{className:'form-input',placeholder:'Optional note…',style:{marginBottom:6,fontSize:12}});
+        var apBtn  = h('button',{className:'btn sm success',onClick:function(){
+          apBtn.disabled=true; rejBtn.disabled=true;
+          api(null,{action:'decideLeave',id:l.id,status:'approved',adminNote:noteIn.value})
+            .then(function(r){ if(r.success){ toast('Leave approved ✓'); loadAdminData().then(function(){wrap.innerHTML='';wrap.appendChild(h('div',{className:'page-title'},'Leave requests'));wrap.appendChild(buildTable());}); } });
+        }},[icon('check'),' Approve']);
+        var rejBtn = h('button',{className:'btn sm danger',onClick:function(){
+          apBtn.disabled=true; rejBtn.disabled=true;
+          api(null,{action:'decideLeave',id:l.id,status:'rejected',adminNote:noteIn.value})
+            .then(function(r){ if(r.success){ toast('Leave rejected'); loadAdminData().then(function(){wrap.innerHTML='';wrap.appendChild(h('div',{className:'page-title'},'Leave requests'));wrap.appendChild(buildTable());}); } });
+        }},[icon('x'),' Reject']);
+        actionsCell = h('td',{},[noteIn,h('div',{style:{display:'flex',gap:6}},[apBtn,rejBtn])]);
+      } else {
+        actionsCell = h('td',{},h('span',{style:{fontSize:12,color:'var(--text-muted)'}},l.adminNote||'—'));
+      }
+      return h('tr',{},[
+        h('td',{},personCell(l.staffName,l.designation||'')),
+        h('td',{},l.type), h('td',{},fmtDate(l.fromDate)), h('td',{},fmtDate(l.toDate)),
+        h('td',{style:{maxWidth:200}},l.reason), h('td',{},fmtDate(l.appliedAt)),
+        h('td',{},badge(l.status)), actionsCell
+      ]);
+    });
+    card.appendChild(h('div',{className:'table-wrap'},[h('table',{},[
+      h('thead',{},[h('tr',{},[th('Staff'),th('Type'),th('From'),th('To'),th('Reason'),th('Applied'),th('Status'),th('Action / Note')])]),
+      h('tbody',{},[...rows])
+    ])]));
+    return card;
+  }
+
+  wrap.appendChild(buildTable());
+  return wrap;
+}
+
+function adminStaff() {
+  var designations = ['Manager','Senior Associate','Associate','Relationship Executive','Admin','IT Officer','Marketing Officer','Intern'];
+  var wrap = h('div',{});
+  var modalEl = h('div',{});
+  wrap.appendChild(h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'1.25rem'}},[
+    h('div',{className:'page-title',style:{marginBottom:0}},'Staff management'),
+    h('button',{className:'btn primary',onClick:openAdd},[icon('user-plus'),' Add staff'])
+  ]));
+  wrap.appendChild(modalEl);
+  wrap.appendChild(buildTable());
+
+  function buildTable() {
+    var staff = state.data.staff || [];
+    if (!staff.length) return h('div',{className:'card'},[empty('users','No staff yet')]);
+    var rows = staff.map(function(s){
+      return h('tr',{},[
+        h('td',{},personCell(s.name,'')),
+        h('td',{style:{color:'var(--text-secondary)'}},s.email),
+        h('td',{},s.designation),
+        h('td',{style:{color:'var(--text-secondary)'}},s.phone||'—'),
+        h('td',{},badge(String(s.active)==='true'?'Active':'Inactive',String(s.active)==='true'?'active':'inactive')),
+        h('td',{},h('div',{style:{display:'flex',gap:6}},[
+          h('button',{className:'btn sm',onClick:function(){openEdit(s);}},[icon('edit'),' Edit']),
+          h('button',{className:'btn sm '+(String(s.active)==='true'?'danger':'success'),onClick:function(){
+            api(null,{action:'toggleStaff',id:s.id,active:String(s.active)==='true'}).then(function(r){
+              if(r.success){ toast(String(s.active)==='true'?'Staff deactivated':'Staff reactivated'); loadAdminData().then(refreshTable); }
+            });
+          }}, String(s.active)==='true'?'Deactivate':'Reactivate')
+        ]))
+      ]);
+    });
+    return h('div',{className:'card'},[h('div',{className:'table-wrap'},[h('table',{},[
+      h('thead',{},[h('tr',{},[th('Name'),th('Email'),th('Designation'),th('Phone'),th('Status'),th('Actions')])]),
+      h('tbody',{},[...rows])
+    ])])]);
+  }
+
+  function refreshTable() {
+    var old = wrap.querySelector('.card');
+    if (old) old.replaceWith(buildTable());
+    else wrap.appendChild(buildTable());
+  }
+
+  function openAdd() { showModal(null); }
+  function openEdit(s) { showModal(s); }
+
+  function showModal(existing) {
+    var nameIn = h('input',{className:'form-input',placeholder:'Full name',value:existing?existing.name:''});
+    var emailIn = h('input',{className:'form-input',type:'email',placeholder:'Work email',value:existing?existing.email:''});
+    if (existing) emailIn.disabled=true;
+    var desSel = h('select',{className:'form-input'});
+    designations.forEach(function(d){ var o=h('option',{value:d},d); if(existing&&existing.designation===d) o.selected=true; desSel.appendChild(o); });
+    var phoneIn = h('input',{className:'form-input',placeholder:'Phone number',value:existing?existing.phone:''});
+    var pinIn   = h('input',{className:'form-input',type:'password',maxlength:'4',placeholder:'4-digit PIN',value:existing?existing.pin:''});
+    var errEl   = h('div',{className:'err',style:{display:'none'}});
+
+    function save() {
+      errEl.style.display='none';
+      if (!nameIn.value.trim()) { errEl.textContent='Name required'; errEl.style.display=''; return; }
+      if (!pinIn.value || pinIn.value.length!==4 || isNaN(pinIn.value)) { errEl.textContent='PIN must be 4 digits'; errEl.style.display=''; return; }
+      var btn = modalEl.querySelector('.btn.primary');
+      btn.disabled=true; btn.textContent='Saving…';
+      var payload = existing
+        ? {action:'editStaff',id:existing.id,name:nameIn.value,designation:desSel.value,phone:phoneIn.value,pin:pinIn.value}
+        : {action:'addStaff',name:nameIn.value,email:emailIn.value,designation:desSel.value,phone:phoneIn.value,pin:pinIn.value};
+      api(null,payload).then(function(r){
+        btn.disabled=false; btn.textContent=existing?'Save changes':'Add staff';
+        if(r.success){ closeModal(); toast(existing?'Staff updated ✓':'Staff added ✓'); loadAdminData().then(refreshTable); }
+        else { errEl.textContent=r.error||'Error'; errEl.style.display=''; }
+      });
+    }
+
+    function closeModal() { modalEl.innerHTML=''; }
+
+    modalEl.innerHTML='';
+    modalEl.appendChild(h('div',{className:'modal-bg',onClick:function(e){if(e.target===modalEl.firstChild)closeModal();}},[
+      h('div',{className:'modal'},[
+        h('div',{className:'modal-title'},existing?'Edit staff':'Add new staff'),
+        h('div',{className:'grid2'},[
+          h('div',{className:'form-row'},[h('label',{className:'form-label'},'Full name'),nameIn]),
+          h('div',{className:'form-row'},[h('label',{className:'form-label'},'Email'),emailIn]),
+          h('div',{className:'form-row'},[h('label',{className:'form-label'},'Designation'),desSel]),
+          h('div',{className:'form-row'},[h('label',{className:'form-label'},'Phone'),phoneIn]),
+          h('div',{className:'form-row'},[h('label',{className:'form-label'},'4-digit PIN'),pinIn]),
+        ]),
+        errEl,
+        h('div',{className:'modal-actions'},[
+          h('button',{className:'btn',onClick:closeModal},'Cancel'),
+          h('button',{className:'btn primary',onClick:save},existing?'Save changes':'Add staff')
+        ])
+      ])
+    ]));
+  }
+
+  return wrap;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function th(text) { return h('th',{},text); }
+function empty(icn, msg) {
+  return h('div',{className:'empty'},[h('i',{className:'ti ti-'+icn}),h('p',{},msg)]);
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
