@@ -195,7 +195,8 @@ function h(tag, attrs, children) {
   });
   if (children) [].concat(children).forEach(function(c) {
     if (c == null) return;
-    el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    var isText = typeof c === 'string' || typeof c === 'number';
+    el.appendChild(isText ? document.createTextNode(String(c)) : c);
   });
   return el;
 }
