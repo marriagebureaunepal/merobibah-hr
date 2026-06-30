@@ -408,23 +408,16 @@ function renderPage() {
   if (main) renderPageInto(main);
 }
 
-function renderPageInto(el) {
-  el.innerHTML = '';
+var lastFetchAt = 0;
+var FRESH_MS = 15000; // treat cached data as fresh for 15s to avoid refetching on every click
+
+function renderPageInto(el, forceRefresh) {
   var isAdmin = state.portal === 'admin';
   var page = state.page;
+  var hasCache = isAdmin ? (state.data.staff && state.data.staff.length >= 0 && lastFetchAt) : (lastFetchAt);
+  var isFresh = hasCache && (Date.now() - lastFetchAt) < FRESH_MS;
 
-  // Auto-refresh data on page switch
-  var dataPromise;
-  if (isAdmin) {
-    dataPromise = loadAdminData();
-  } else {
-    dataPromise = loadStaffData();
-  }
-
-  // Show loading placeholder
-  el.appendChild(h('div', {className:'loading'}, [h('div', {className:'spinner'}), 'Loading…']));
-
-  dataPromise.then(function() {
+  function paint() {
     el.innerHTML = '';
     if (isAdmin) {
       if (page==='dashboard')  el.appendChild(adminDashboard());
@@ -439,36 +432,49 @@ function renderPageInto(el) {
       if (page==='leave')      el.appendChild(staffLeave());
       if (page==='history')    el.appendChild(staffHistory());
     }
+  }
+
+  // If we have fresh cached data and this isn't a forced refresh, paint instantly.
+  if (isFresh && !forceRefresh) {
+    paint();
+    return;
+  }
+
+  // Otherwise show a loading state (or keep current content if we have something)
+  // and fetch in the background.
+  if (!hasCache) {
+    el.innerHTML = '';
+    el.appendChild(h('div', {className:'loading'}, [h('div', {className:'spinner'}), 'Loading…']));
+  }
+
+  var dataPromise = isAdmin ? loadAdminData() : loadStaffData();
+  dataPromise.then(function() {
+    lastFetchAt = Date.now();
+    paint();
   });
 }
 
 // ── DATA LOADERS ─────────────────────────────────────────────────────────
 function loadStaffData() {
   var user = state.user;
-  return Promise.all([
-    api({action:'getAttendance', staffId:user.id}),
-    api({action:'getWorklogs',   staffId:user.id}),
-    api({action:'getLeaves',     staffId:user.id}),
-  ]).then(function(results) {
-    state.data.attendance = results[0].data || [];
-    state.data.worklogs   = results[1].data || [];
-    state.data.leaves     = results[2].data || [];
+  return api({action:'getStaffBundle', staffId:user.id}).then(function(res) {
+    var d = res.data || {};
+    state.data.attendance = d.attendance || [];
+    state.data.worklogs   = d.worklogs   || [];
+    state.data.leaves     = d.leaves     || [];
+    lastFetchAt = Date.now();
   });
 }
 
 function loadAdminData() {
-  return Promise.all([
-    api({action:'getDashboard'}),
-    api({action:'getStaff'}),
-    api({action:'getAttendance'}),
-    api({action:'getWorklogs'}),
-    api({action:'getLeaves'}),
-  ]).then(function(results) {
-    state.data.dashboard  = (results[0].data) || {};
-    state.data.staff      = results[1].data || [];
-    state.data.attendance = results[2].data || [];
-    state.data.worklogs   = results[3].data || [];
-    state.data.leaves     = results[4].data || [];
+  return api({action:'getAdminBundle'}).then(function(res) {
+    var d = res.data || {};
+    state.data.staff      = d.staff      || [];
+    state.data.attendance = d.attendance || [];
+    state.data.worklogs   = d.worklogs   || [];
+    state.data.leaves     = d.leaves     || [];
+    state.data.dashboard  = d.dashboard  || {};
+    lastFetchAt = Date.now();
   });
 }
 
