@@ -224,8 +224,14 @@ function api(params, body) {
   if (params) {
     url += '?' + Object.keys(params).map(function(k){ return k+'='+encodeURIComponent(params[k]); }).join('&');
   }
-  var opts = { method: body ? 'POST' : 'GET', headers: {'Content-Type':'application/json'} };
-  if (body) opts.body = JSON.stringify(body);
+  var opts = { method: body ? 'POST' : 'GET' };
+  if (body) {
+    // Use text/plain to avoid a CORS preflight (OPTIONS) request, which
+    // Apps Script web apps do not handle. The body is still valid JSON text;
+    // Code.gs parses e.postData.contents with JSON.parse regardless of header.
+    opts.headers = { 'Content-Type': 'text/plain;charset=utf-8' };
+    opts.body = JSON.stringify(body);
+  }
   return fetch(url, opts)
     .then(function(r){ return r.json(); })
     .catch(function(e){ return { success:false, error: e.message }; });
